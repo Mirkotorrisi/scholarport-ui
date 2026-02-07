@@ -1,23 +1,13 @@
 import React from "react";
 import { FileText } from "lucide-react";
-import type { Article, PaginationMeta } from "../types";
+import { useArticles } from "../hooks/useArticles";
 import Loader from "./ui/Loader";
 import ArticleRow from "./ArticleRow";
 import Pagination from "./ui/Pagination";
 
-interface ArticleListProps {
-  articles: Article[];
-  meta: PaginationMeta;
-  loading: boolean;
-  onPageChange: (page: number) => void;
-}
+const ArticleList: React.FC = () => {
+  const { articles, meta, loading, updatePage } = useArticles();
 
-const ArticleList: React.FC<ArticleListProps> = ({
-  articles,
-  meta,
-  loading,
-  onPageChange,
-}) => {
   if (loading) {
     return <Loader />;
   }
@@ -46,8 +36,7 @@ const ArticleList: React.FC<ArticleListProps> = ({
         ))}
       </div>
 
-      {/* Pagination */}
-      <Pagination meta={meta} onPageChange={onPageChange} />
+      <Pagination meta={meta} onPageChange={updatePage} />
     </div>
   );
 };

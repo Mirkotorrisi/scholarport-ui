@@ -1,70 +1,51 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import {
-  getArticleById,
-  getArticleCitations,
-  updateArticle,
-} from "../api/client";
 import ArticleDetail from "../components/ArticleDetail";
 import CitationList from "../components/CitationList";
 import Modal from "../components/ui/Modal";
 import ArticleForm from "../components/ArticleForm";
-import type { Article, Citation } from "../types";
 import { Quote } from "lucide-react";
+import { useArticles } from "../hooks/useArticles";
 
 const ArticleDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [article, setArticle] = useState<Article | null>(null);
-  const [citations, setCitations] = useState<Citation[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const {
+    currentArticle,
+    citations,
+    detailLoading,
+    detailError,
+    loadArticleDetails,
+    clearCurrentArticle,
+    initEdit,
+  } = useArticles();
 
   useEffect(() => {
-    if (!id) return;
-
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [articleRes, citationsRes] = await Promise.all([
-          getArticleById(id),
-          getArticleCitations(id),
-        ]);
-        setArticle(articleRes.data);
-        setCitations(citationsRes.data);
-      } catch (err) {
-        setError("Failed to load article details.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+    if (id) {
+      loadArticleDetails(id);
+    }
+    return () => {
+      clearCurrentArticle();
     };
-
-    fetchData();
-  }, [id]);
+  }, [id, loadArticleDetails, clearCurrentArticle]);
 
   const handleEdit = () => {
-    setIsEditModalOpen(true);
+    if (currentArticle) {
+      initEdit(currentArticle);
+      setIsEditModalOpen(true);
+    }
   };
 
-  const handleUpdateArticle = async (data: Omit<Article, "id">) => {
-    if (!article) return;
-    try {
-      const response = await updateArticle(article.id, data);
-      setArticle(response.data);
-      setIsEditModalOpen(false);
-    } catch (err) {
-      console.error("Failed to update article", err);
-      // Ideally show error toast here
-    }
+  const handleUpdateSuccess = async () => {
+    setIsEditModalOpen(false);
   };
 
   const handleAddCitation = () => {
     // TODO: Open Add Citation Modal or Form
-    console.log("Add citation to", article?.id);
+    console.log("Add citation to", currentArticle?.id);
   };
 
-  if (loading) {
+  if (detailLoading) {
     return (
       <div className="animate-pulse space-y-8">
         <div className="h-64 bg-slate-200 rounded-xl"></div>
@@ -73,13 +54,13 @@ const ArticleDetailPage: React.FC = () => {
     );
   }
 
-  if (error || !article) {
+  if (detailError || !currentArticle) {
     return (
       <div className="text-center py-20">
         <div className="text-red-500 text-lg font-medium">
           Error loading article
         </div>
-        <p className="text-slate-500">{error || "Article not found"}</p>
+        <p className="text-slate-500">{detailError || "Article not found"}</p>
       </div>
     );
   }
@@ -87,7 +68,7 @@ const ArticleDetailPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <ArticleDetail
-        article={article}
+        article={currentArticle}
         onEdit={handleEdit}
         onAddCitation={handleAddCitation}
       />
@@ -105,13 +86,10 @@ const ArticleDetailPage: React.FC = () => {
         onClose={() => setIsEditModalOpen(false)}
         title="Edit Article"
       >
-        {article && (
-          <ArticleForm
-            initialData={article}
-            onSubmit={handleUpdateArticle}
-            onCancel={() => setIsEditModalOpen(false)}
-          />
-        )}
+        <ArticleForm
+          onSuccess={handleUpdateSuccess}
+          onCancel={() => setIsEditModalOpen(false)}
+        />
       </Modal>
     </div>
   );

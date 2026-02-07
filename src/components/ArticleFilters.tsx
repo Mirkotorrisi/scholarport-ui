@@ -1,20 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Search, User, SortAsc } from "lucide-react";
-import type {
-  ArticleFilters as FilterType,
-  SortField,
-  SortOrder,
-} from "../types";
+import { useArticles } from "../hooks/useArticles";
+import type { SortField, SortOrder } from "../types";
 
-interface ArticleFiltersProps {
-  filters: FilterType;
-  onFilterChange: (newFilters: FilterType) => void;
-}
-
-const ArticleFilters: React.FC<ArticleFiltersProps> = ({
-  filters,
-  onFilterChange,
-}) => {
+const ArticleFilters: React.FC = () => {
+  const { filters, updateFilters } = useArticles();
   const [localSearch, setLocalSearch] = useState(filters.query || "");
   const [localAuthor, setLocalAuthor] = useState(filters.author || "");
 
@@ -22,21 +12,17 @@ const ArticleFilters: React.FC<ArticleFiltersProps> = ({
   useEffect(() => {
     const timer = setTimeout(() => {
       if (localSearch !== filters.query) {
-        onFilterChange({
-          ...filters,
-          query: localSearch || undefined,
-          page: 1,
-        });
+        updateFilters({ ...filters, query: localSearch || undefined, page: 1 });
       }
     }, 500);
     return () => clearTimeout(timer);
-  }, [localSearch, filters, onFilterChange]);
+  }, [localSearch, filters, updateFilters]);
 
   // Debounce Author
   useEffect(() => {
     const timer = setTimeout(() => {
       if (localAuthor !== filters.author) {
-        onFilterChange({
+        updateFilters({
           ...filters,
           author: localAuthor || undefined,
           page: 1,
@@ -44,10 +30,10 @@ const ArticleFilters: React.FC<ArticleFiltersProps> = ({
       }
     }, 500);
     return () => clearTimeout(timer);
-  }, [localAuthor, filters, onFilterChange]);
+  }, [localAuthor, filters, updateFilters]);
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onFilterChange({
+    updateFilters({
       ...filters,
       [e.target.name]: e.target.value || undefined,
       page: 1,
@@ -57,7 +43,7 @@ const ArticleFilters: React.FC<ArticleFiltersProps> = ({
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     const [sort, order] = value.split("-") as [SortField, SortOrder];
-    onFilterChange({ ...filters, sort, order, page: 1 });
+    updateFilters({ ...filters, sort, order, page: 1 });
   };
 
   return (

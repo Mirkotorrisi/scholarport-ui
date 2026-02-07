@@ -1,59 +1,28 @@
-import React, { useState } from "react";
-import type { Article } from "../types";
+import React from "react";
+import { useArticles } from "../hooks/useArticles";
 
 interface ArticleFormProps {
-  initialData?: Article;
-  onSubmit: (data: Omit<Article, "id">) => Promise<void>;
   onCancel: () => void;
+  onSuccess: () => void;
 }
 
-const ArticleForm: React.FC<ArticleFormProps> = ({
-  initialData,
-  onSubmit,
-  onCancel,
-}) => {
-  const [formData, setFormData] = useState({
-    title: initialData?.title || "",
-    authors: initialData?.authors.join(", ") || "",
-    abstract: initialData?.abstract || "",
-    publicationDate:
-      initialData?.publicationDate || new Date().toISOString().split("T")[0],
-    doi: initialData?.doi || "",
-  });
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+const ArticleForm: React.FC<ArticleFormProps> = ({ onCancel, onSuccess }) => {
+  const { formData, setFormData, isSubmitting, formError, submitForm } =
+    useArticles();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.authors || !formData.abstract) {
-      setError("Please fill in all required fields.");
-      return;
-    }
-
-    setError(null);
-    setIsSubmitting(true);
-
-    try {
-      await onSubmit({
-        ...formData,
-        authors: formData.authors
-          .split(",")
-          .map((a) => a.trim())
-          .filter(Boolean),
-      });
-    } catch {
-      setError("Failed to save article. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+    const success = await submitForm();
+    if (success) {
+      onSuccess();
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {error && (
+      {formError && (
         <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm border border-red-100">
-          {error}
+          {formError}
         </div>
       )}
 
