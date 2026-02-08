@@ -70,9 +70,20 @@ The application uses the following environment variables:
 
 Make sure to restart the dev server after changing `.env` files.
 
+## 🧪 Testing
+
+This project uses [Vitest](https://vitest.dev/) and [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) for unit testing.
+
+To run the tests, execute:
+
+```bash
+npm run test
+```
+
 ## 📜 Scripts
 
 - `npm run dev`: Starts the development server.
 - `npm run build`: Builds the application for production.
 - `npm run preview`: Previews the production build locally.
 - `npm run lint`: Runs ESLint to check for code quality issues.
+- `npm run test`: Runs unit tests using Vitest.

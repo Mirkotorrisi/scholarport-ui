@@ -35,8 +35,8 @@ export interface ArticlesContextType {
   initEdit: (article: Article) => void;
 
   // Data Actions
-  createArticle: (data: Omit<Article, "id">) => Promise<void>;
-  updateArticle: (id: string, data: Omit<Article, "id">) => Promise<Article>;
+  createArticle: (data: Partial<Article>) => Promise<void>;
+  updateArticle: (id: string, data: Partial<Article>) => Promise<Article>;
   refresh: () => void;
 
   // Detail State
