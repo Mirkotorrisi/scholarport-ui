@@ -32,7 +32,7 @@ const ArticleList: React.FC = () => {
     <div className="space-y-6">
       <div className="grid gap-4">
         {articles?.map((article) => (
-          <ArticleRow key={article.id} article={article} />
+          <ArticleRow key={article._id} article={article} />
         ))}
       </div>
 

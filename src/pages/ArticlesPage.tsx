@@ -4,10 +4,9 @@ import ArticleList from "../components/ArticleList";
 import Modal from "../components/ui/Modal";
 import ArticleForm from "../components/ArticleForm";
 import { Plus } from "lucide-react";
-import { ArticlesProvider } from "../context/ArticlesProvider";
 import { useArticles } from "../hooks/useArticles";
 
-const ArticlesContent: React.FC = () => {
+const ArticlesPage: React.FC = () => {
   const { error, initCreate } = useArticles();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -56,14 +55,6 @@ const ArticlesContent: React.FC = () => {
         />
       </Modal>
     </div>
-  );
-};
-
-const ArticlesPage: React.FC = () => {
-  return (
-    <ArticlesProvider>
-      <ArticlesContent />
-    </ArticlesProvider>
   );
 };
 

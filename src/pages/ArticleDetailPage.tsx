@@ -42,7 +42,7 @@ const ArticleDetailPage: React.FC = () => {
 
   const handleAddCitation = () => {
     // TODO: Open Add Citation Modal or Form
-    console.log("Add citation to", currentArticle?.id);
+    console.log("Add citation to", currentArticle?._id);
   };
 
   if (detailLoading) {

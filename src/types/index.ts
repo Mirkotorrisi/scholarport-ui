@@ -1,5 +1,5 @@
 export interface Article {
-  id: string;
+  _id: string;
   title: string;
   authors: string[];
   abstract: string;
@@ -29,14 +29,13 @@ export interface ArticleFilters {
   pageSize?: number;
 }
 
-export interface PaginationMeta {
+export type PaginationMeta = {
   page: number;
   pageSize: number;
   totalItems: number;
   totalPages: number;
-}
+};
 
-export interface PaginatedResponse<T> {
-  data: T[];
-  meta: PaginationMeta;
-}
+export type PaginatedResponse<T> = {
+  items: T[];
+} & PaginationMeta;

@@ -1,19 +1,24 @@
-import React, { useEffect, useState, useMemo, type ReactNode } from "react";
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  type ReactNode,
+  useCallback,
+} from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   getArticles,
   createArticle as apiCreateArticle,
   updateArticle as apiUpdateArticle,
   getArticleById,
-  getArticleCitations,
 } from "../api/client";
 import type {
   Article,
   ArticleFilters as FilterType,
-  PaginationMeta,
   SortField,
   SortOrder,
   Citation,
+  PaginationMeta,
 } from "../types";
 
 import {
@@ -78,8 +83,13 @@ export const ArticlesProvider: React.FC<{ children: ReactNode }> = ({
       setError(null);
       try {
         const response = await getArticles(filters);
-        setArticles(response.data.data);
-        setMeta(response.data.meta);
+        setArticles(response.data?.items);
+        setMeta({
+          page: response.data?.page,
+          pageSize: response.data?.pageSize,
+          totalItems: response.data?.totalItems,
+          totalPages: response.data?.totalPages,
+        });
       } catch (err) {
         setError("Failed to fetch articles. Please try again later.");
         console.error(err);
@@ -91,53 +101,62 @@ export const ArticlesProvider: React.FC<{ children: ReactNode }> = ({
     fetchArticles();
   }, [filters, refreshKey]);
 
-  const updateFilters = (newFilters: FilterType) => {
-    const params = new URLSearchParams();
-    if (newFilters.query) params.set("query", newFilters.query);
-    if (newFilters.author) params.set("author", newFilters.author);
-    if (newFilters.fromDate) params.set("fromDate", newFilters.fromDate);
-    if (newFilters.toDate) params.set("toDate", newFilters.toDate);
-    if (newFilters.sort) params.set("sort", newFilters.sort);
-    if (newFilters.order) params.set("order", newFilters.order);
-    if (newFilters.page && newFilters.page > 1)
-      params.set("page", newFilters.page.toString());
+  const updateFilters = useCallback(
+    (newFilters: FilterType) => {
+      const params = new URLSearchParams();
+      if (newFilters.query) params.set("query", newFilters.query);
+      if (newFilters.author) params.set("author", newFilters.author);
+      if (newFilters.fromDate) params.set("fromDate", newFilters.fromDate);
+      if (newFilters.toDate) params.set("toDate", newFilters.toDate);
+      if (newFilters.sort) params.set("sort", newFilters.sort);
+      if (newFilters.order) params.set("order", newFilters.order);
+      if (newFilters.page && newFilters.page > 1)
+        params.set("page", newFilters.page.toString());
 
-    setSearchParams(params);
-  };
+      setSearchParams(params);
+    },
+    [setSearchParams],
+  );
 
-  const updatePage = (newPage: number) => {
-    updateFilters({ ...filters, page: newPage });
-  };
+  const updatePage = useCallback(
+    (newPage: number) => {
+      updateFilters({ ...filters, page: newPage });
+    },
+    [filters, updateFilters],
+  );
 
-  const createArticle = async (data: Omit<Article, "id">) => {
+  const createArticle = useCallback(async (data: Omit<Article, "_id">) => {
     await apiCreateArticle(data);
     setRefreshKey((prev) => prev + 1);
-  };
+  }, []);
 
-  const updateArticle = async (id: string, data: Omit<Article, "id">) => {
-    const response = await apiUpdateArticle(id, data);
-    setRefreshKey((prev) => prev + 1);
-    // If we are currently viewing this article, update the detail view as well
-    if (currentArticle?.id === id) {
-      setCurrentArticle(response.data);
-    }
-    return response.data;
-  };
+  const updateArticle = useCallback(
+    async (id: string, data: Omit<Article, "_id">) => {
+      const response = await apiUpdateArticle(id, data);
+      setRefreshKey((prev) => prev + 1);
+      // If we are currently viewing this article, update the detail view as well
+      if (currentArticle?._id === id) {
+        setCurrentArticle(response.data);
+      }
+      return response.data;
+    },
+    [currentArticle],
+  );
 
-  const refresh = () => setRefreshKey((prev) => prev + 1);
+  const refresh = useCallback(() => setRefreshKey((prev) => prev + 1), []);
 
   // Form Actions
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setFormData(INITIAL_FORM_DATA);
     setFormError(null);
     setEditingId(null);
-  };
+  }, []);
 
-  const initCreate = () => {
+  const initCreate = useCallback(() => {
     resetForm();
-  };
+  }, [resetForm]);
 
-  const initEdit = (article: Article) => {
+  const initEdit = useCallback((article: Article) => {
     setFormData({
       title: article.title,
       authors: article.authors.join(", "),
@@ -146,10 +165,10 @@ export const ArticlesProvider: React.FC<{ children: ReactNode }> = ({
       doi: article.doi,
     });
     setFormError(null);
-    setEditingId(article.id);
-  };
+    setEditingId(article._id);
+  }, []);
 
-  const submitForm = async (): Promise<boolean> => {
+  const submitForm = useCallback(async (): Promise<boolean> => {
     if (!formData.title || !formData.authors || !formData.abstract) {
       setFormError("Please fill in all required fields.");
       return false;
@@ -182,32 +201,28 @@ export const ArticlesProvider: React.FC<{ children: ReactNode }> = ({
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [formData, editingId, updateArticle, createArticle, resetForm]);
 
   // Detail Actions
-  const loadArticleDetails = async (id: string) => {
+  const loadArticleDetails = useCallback(async (id: string) => {
     setDetailLoading(true);
     setDetailError(null);
     try {
-      const [articleRes, citationsRes] = await Promise.all([
-        getArticleById(id),
-        getArticleCitations(id),
-      ]);
+      const articleRes = await getArticleById(id);
       setCurrentArticle(articleRes.data);
-      setCitations(citationsRes.data);
     } catch (err) {
       setDetailError("Failed to load article details.");
       console.error(err);
     } finally {
       setDetailLoading(false);
     }
-  };
+  }, []);
 
-  const clearCurrentArticle = () => {
+  const clearCurrentArticle = useCallback(() => {
     setCurrentArticle(null);
     setCitations([]);
     setDetailError(null);
-  };
+  }, []);
 
   const value: ArticlesContextType = {
     articles,

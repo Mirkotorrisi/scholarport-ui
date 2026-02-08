@@ -10,7 +10,7 @@ interface ArticleRowProps {
 const ArticleRow: React.FC<ArticleRowProps> = ({ article }) => {
   return (
     <Link
-      to={`/articles/${article.id}`}
+      to={`/articles/${article._id}`}
       className="block bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-lg hover:border-brand-200 hover:-translate-y-0.5 transition-all group"
     >
       <div className="flex justify-between items-start">
