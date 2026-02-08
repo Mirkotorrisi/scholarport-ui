@@ -67,13 +67,13 @@ const ArticleDetail: React.FC<ArticleDetailProps> = ({
         <div className="flex flex-wrap gap-4 pt-4">
           <button
             onClick={onEdit}
-            className="flex items-center gap-2 px-5 py-2.5 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors shadow-sm font-medium"
+            className="flex items-center gap-2 px-5 py-2.5 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors shadow-sm font-medium cursor-pointer"
           >
             <Edit size={18} /> Edit Article
           </button>
           <button
             onClick={onAddCitation}
-            className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium"
+            className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium cursor-pointer"
           >
             <Plus size={18} /> Add Citation
           </button>

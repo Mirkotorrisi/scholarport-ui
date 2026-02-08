@@ -1,5 +1,10 @@
 import axios from "axios";
-import type { Article, ArticleFilters, PaginatedResponse } from "../types";
+import type {
+  Article,
+  ArticleFilters,
+  PaginatedResponse,
+  Citation,
+} from "../types";
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL + "/api",
@@ -20,10 +25,13 @@ export const getArticles = (params: ArticleFilters) =>
 export const getArticleById = (id: string) =>
   apiClient.get<Article>(`/articles/${id}`);
 
-export const createArticle = (article: Omit<Article, "_id">) =>
+export const createArticle = (article: Partial<Article>) =>
   apiClient.post<Article>("/articles", article);
 
 export const updateArticle = (id: string, article: Partial<Article>) =>
   apiClient.put<Article>(`/articles/${id}`, article);
+
+export const addCitation = (id: string, citation: Citation) =>
+  apiClient.post<Article>(`/articles/${id}/citations`, citation);
 
 export default apiClient;

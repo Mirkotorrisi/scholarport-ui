@@ -5,14 +5,14 @@ export interface Article {
   abstract: string;
   publicationDate: string;
   doi: string;
+  citations: Citation[];
 }
 
 export interface Citation {
-  id: string;
   title: string;
   authors: string[];
   year: number;
-  doi?: string;
+  doi: string;
 }
 
 export type SortField = "date" | "title";

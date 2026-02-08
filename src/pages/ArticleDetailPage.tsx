@@ -4,20 +4,23 @@ import ArticleDetail from "../components/ArticleDetail";
 import CitationList from "../components/CitationList";
 import Modal from "../components/ui/Modal";
 import ArticleForm from "../components/ArticleForm";
+import CitationForm from "../components/CitationForm";
+import type { Citation } from "../types";
 import { Quote } from "lucide-react";
 import { useArticles } from "../hooks/useArticles";
 
 const ArticleDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isCitationModalOpen, setIsCitationModalOpen] = useState(false);
   const {
     currentArticle,
-    citations,
     detailLoading,
     detailError,
     loadArticleDetails,
     clearCurrentArticle,
     initEdit,
+    addCitation,
   } = useArticles();
 
   useEffect(() => {
@@ -41,8 +44,16 @@ const ArticleDetailPage: React.FC = () => {
   };
 
   const handleAddCitation = () => {
-    // TODO: Open Add Citation Modal or Form
-    console.log("Add citation to", currentArticle?._id);
+    setIsCitationModalOpen(true);
+  };
+
+  const handleCitationSubmit = async (citation: Citation) => {
+    if (currentArticle) {
+      const response = await addCitation(currentArticle._id, citation);
+      if (response) {
+        setIsCitationModalOpen(false);
+      }
+    }
   };
 
   if (detailLoading) {
@@ -76,9 +87,12 @@ const ArticleDetailPage: React.FC = () => {
       <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
         <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
           <Quote className="text-brand-500" size={24} />
-          Citations ({citations.length})
+          Citations{" "}
+          {currentArticle?.citations?.length
+            ? `(${currentArticle?.citations?.length})`
+            : ""}
         </h3>
-        <CitationList citations={citations} />
+        <CitationList citations={currentArticle?.citations || []} />
       </div>
 
       <Modal
@@ -89,6 +103,17 @@ const ArticleDetailPage: React.FC = () => {
         <ArticleForm
           onSuccess={handleUpdateSuccess}
           onCancel={() => setIsEditModalOpen(false)}
+        />
+      </Modal>
+
+      <Modal
+        isOpen={isCitationModalOpen}
+        onClose={() => setIsCitationModalOpen(false)}
+        title="Add Citation"
+      >
+        <CitationForm
+          onSuccess={handleCitationSubmit}
+          onCancel={() => setIsCitationModalOpen(false)}
         />
       </Modal>
     </div>

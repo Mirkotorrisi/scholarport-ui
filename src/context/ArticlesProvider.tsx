@@ -11,6 +11,7 @@ import {
   createArticle as apiCreateArticle,
   updateArticle as apiUpdateArticle,
   getArticleById,
+  addCitation as apiAddCitation,
 } from "../api/client";
 import type {
   Article,
@@ -58,7 +59,6 @@ export const ArticlesProvider: React.FC<{ children: ReactNode }> = ({
 
   // Detail State
   const [currentArticle, setCurrentArticle] = useState<Article | null>(null);
-  const [citations, setCitations] = useState<Citation[]>([]);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
 
@@ -125,13 +125,13 @@ export const ArticlesProvider: React.FC<{ children: ReactNode }> = ({
     [filters, updateFilters],
   );
 
-  const createArticle = useCallback(async (data: Omit<Article, "_id">) => {
+  const createArticle = useCallback(async (data: Partial<Article>) => {
     await apiCreateArticle(data);
     setRefreshKey((prev) => prev + 1);
   }, []);
 
   const updateArticle = useCallback(
-    async (id: string, data: Omit<Article, "_id">) => {
+    async (id: string, data: Partial<Article>) => {
       const response = await apiUpdateArticle(id, data);
       setRefreshKey((prev) => prev + 1);
       // If we are currently viewing this article, update the detail view as well
@@ -218,9 +218,25 @@ export const ArticlesProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, []);
 
+  const addCitation = useCallback(
+    async (articleId: string, citation: Citation) => {
+      try {
+        const article = await apiAddCitation(articleId, citation);
+
+        // Refresh article details to show new citation
+        if (article) setCurrentArticle(article.data);
+        return article.data;
+      } catch (err) {
+        console.error(err);
+        setDetailError("Failed to add citation.");
+        return null;
+      }
+    },
+    [setCurrentArticle],
+  );
+
   const clearCurrentArticle = useCallback(() => {
     setCurrentArticle(null);
-    setCitations([]);
     setDetailError(null);
   }, []);
 
@@ -247,10 +263,10 @@ export const ArticlesProvider: React.FC<{ children: ReactNode }> = ({
     refresh,
     // Detail
     currentArticle,
-    citations,
     detailLoading,
     detailError,
     loadArticleDetails,
+    addCitation,
     clearCurrentArticle,
   };
 

@@ -1,5 +1,4 @@
 import React from "react";
-import { Calendar } from "lucide-react";
 import type { Citation } from "../types";
 
 interface CitationListProps {
@@ -15,9 +14,9 @@ const CitationList: React.FC<CitationListProps> = ({ citations }) => {
 
   return (
     <div className="space-y-4">
-      {citations.map((citation) => (
+      {citations.map((citation, index) => (
         <div
-          key={citation.id}
+          key={index}
           className="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:bg-white hover:shadow-sm transition-all"
         >
           <h4 className="font-medium text-slate-900 mb-1">{citation.title}</h4>
@@ -25,10 +24,9 @@ const CitationList: React.FC<CitationListProps> = ({ citations }) => {
             {citation.authors.join(", ")}
           </p>
           <div className="flex items-center gap-4 text-xs text-slate-500">
-            <div className="flex items-center gap-1">
-              <Calendar size={12} />
-              <span>{citation.year}</span>
-            </div>
+            <span className="bg-slate-200 text-slate-700 px-2 py-0.5 rounded">
+              {citation.year}
+            </span>
             {citation.doi && (
               <div className="font-mono bg-white px-2 py-0.5 rounded border border-slate-200">
                 DOI: {citation.doi}

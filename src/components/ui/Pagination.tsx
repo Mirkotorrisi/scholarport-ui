@@ -12,7 +12,7 @@ const Pagination: React.FC<PaginationProps> = ({ meta, onPageChange }) => {
 
   return (
     <div className="flex items-center justify-between border-t border-slate-200 pt-6">
-      <div className="text-sm text-slate-500">
+      <div className="flex gap-1 text-sm text-slate-500">
         Showing
         <span className="font-medium text-slate-900">
           {(meta.page - 1) * meta.pageSize + 1}

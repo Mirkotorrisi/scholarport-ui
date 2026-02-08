@@ -41,12 +41,15 @@ export interface ArticlesContextType {
 
   // Detail State
   currentArticle: Article | null;
-  citations: Citation[];
   detailLoading: boolean;
   detailError: string | null;
 
   // Detail Actions
   loadArticleDetails: (id: string) => Promise<void>;
+  addCitation: (
+    articleId: string,
+    citation: Citation,
+  ) => Promise<Article | null>;
   clearCurrentArticle: () => void;
 }
 
